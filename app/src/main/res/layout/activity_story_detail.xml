@@ -1,52 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/primaryDark">
 
+    <!-- Gambar Sampul Cerita -->
+    <ImageView
+        android:id="@+id/imgCover"
+        android:layout_width="0dp"
+        android:layout_height="300dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="Story Cover Image"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Judul Cerita -->
     <TextView
         android:id="@+id/tvDetailJudul"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="16dp"
-        android:text="Judul Cerita"
-        android:textSize="24sp"
-        android:textStyle="bold" />
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="24dp"
+        android:text="Walk on Mars"
+        android:textColor="@color/textPrimary"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/imgCover"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp">
+    <!-- Deskripsi Singkat -->
+    <TextView
+        android:id="@+id/tvDescription"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="Join Mia and her robot friend on an extraordinary journey across the Martian landscape..."
+        android:textColor="@color/textSecondary"
+        android:textSize="16sp"
+        android:lineSpacingExtra="4dp"
+        android:ellipsize="end"
+        android:maxLines="6"
+        app:layout_constraintTop_toBottomOf="@id/tvDetailJudul"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/buttonLayout"/>
 
-        <ImageView
-            android:id="@+id/imgCover"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:contentDescription="Story Cover Image" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnPlay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="Play Audio"
-            app:backgroundTint="#4CAF50"
-            app:elevation="4dp"
-            app:srcCompat="@drawable/ic_play"
-            app:tint="@android:color/white"
-            android:layout_gravity="bottom|start"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="16dp" />
-
-    </FrameLayout>
-
+    <!-- WebView (untuk membaca) - Awalnya tersembunyi -->
     <WebView
         android:id="@+id/webViewDetail"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1" />
-</LinearLayout>
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tvDetailJudul"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/buttonLayout" />
+
+
+    <!-- Kontainer Tombol di Bawah -->
+    <LinearLayout
+        android:id="@+id/buttonLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnListen"
+            style="@style/Widget.Storybook.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="Listen"
+            android:textSize="16sp"
+            app:icon="@drawable/ic_listen"
+            app:iconTint="@color/primaryDark" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRead"
+            style="@style/Widget.Storybook.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Read"
+            android:textSize="16sp"
+            app:icon="@drawable/ic_read"
+            app:iconTint="@color/accentYellow" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

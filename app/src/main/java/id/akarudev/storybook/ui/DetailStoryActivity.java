@@ -1,7 +1,8 @@
-package id.akarudev.storybook.ui; // Paket diubah
+package id.akarudev.storybook.ui;
 
 import android.content.res.AssetFileDescriptor;
-import android.graphics.drawable.Drawable; // <-- DITAMBAHKAN
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,46 +10,46 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import android.widget.ImageView; // <-- DITAMBAHKAN
+import com.google.android.material.button.MaterialButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import java.io.IOException;
-import java.io.InputStream; // <-- DITAMBAHKAN
+import java.io.InputStream;
 import java.util.Locale;
-// Import diubah
 import id.akarudev.storybook.R;
 import id.akarudev.storybook.model.DataStory;
 import id.akarudev.storybook.util.Constans;
 
 public class DetailStoryActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
 
-    TextView tvDetailJudul;
-    ImageView imgCover; // <-- DITAMBAHKAN
+    TextView tvDetailJudul, tvDescription;
+    ImageView imgCover;
     WebView webViewDetail;
-    FloatingActionButton btnPlay;
+    MaterialButton btnListen, btnRead;
 
-    DataStory story; // Menggunakan objek DataStory
-    String storyText; // Tetap simpan story text untuk TTS
+    DataStory story;
+    String storyText; // Teks untuk TTS
 
     MediaPlayer mediaPlayer;
     boolean isAudioFileReady = false;
+    boolean isPlaying = false;
     TextToSpeech textToSpeech;
     boolean isTTSReady = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Layout diubah
         setContentView(R.layout.activity_story_detail);
 
         tvDetailJudul = findViewById(R.id.tvDetailJudul);
-        imgCover = findViewById(R.id.imgCover); // <-- DITAMBAHKAN
+        tvDescription = findViewById(R.id.tvDescription);
+        imgCover = findViewById(R.id.imgCover);
         webViewDetail = findViewById(R.id.webViewDetail);
-        btnPlay = findViewById(R.id.btnPlay);
+        btnListen = findViewById(R.id.btnListen);
+        btnRead = findViewById(R.id.btnRead);
 
-        // Mengambil objek DataStory dari Intent
         story = (DataStory) getIntent().getSerializableExtra(Constans.KEY_STORY_DATA);
 
         if (story == null) {
@@ -57,64 +58,45 @@ public class DetailStoryActivity extends AppCompatActivity implements TextToSpee
             return;
         }
 
-        // (PERUBAHAN) Simpan text untuk TTS dari field 'tts_text'
         storyText = story.getTts_text();
-
-        // (PERUBAHAN) Ambil HTML lengkap dari 'story_text'
         String storyHtml = story.getStory_text();
 
-        // Tampilkan data
         tvDetailJudul.setText(story.getTitle());
 
-        // --- PERUBAHAN: Memuat Gambar Cover dari Assets ---
+        if (storyText != null && !storyText.isEmpty()) {
+            if (storyText.length() > 200) {
+                tvDescription.setText(storyText.substring(0, 200) + "...");
+            } else {
+                tvDescription.setText(storyText);
+            }
+        } else {
+            tvDescription.setText("Tidak ada deskripsi.");
+        }
+
         try {
-            // Buka folder "image" di assets, lalu ambil file berdasarkan nama
             InputStream is = getAssets().open("image/" + story.getImage());
-            // Buat Drawable dari input stream
             Drawable d = Drawable.createFromStream(is, null);
-            // Set gambar ke ImageView
             imgCover.setImageDrawable(d);
             is.close();
         } catch (IOException e) {
             e.printStackTrace();
-            // Set placeholder jika gagal
             imgCover.setImageResource(R.mipmap.ic_launcher);
         }
-        // --- Akhir Perubahan ---
 
-        // --- PERUBAHAN: Memuat data ke WebView ---
-
-        // (PERBAIKAN 1) Aktifkan JavaScript
-        webViewDetail.getSettings().setJavaScriptEnabled(true);
-
-        // (PERBAIKAN 2) Cek jika HTML null atau kosong
-        if (storyHtml == null || storyHtml.isEmpty()) {
-            storyHtml = "<html><body>Cerita tidak ditemukan.</body></html>";
-        }
-
-        // (PERBAIKAN 3) Gunakan loadDataWithBaseURL untuk memuat HTML lengkap dari JSON
-        webViewDetail.loadDataWithBaseURL(null, storyHtml, "text/html; charset=utf-8", "UTF-8", null);
-
-        // --- Akhir Perubahan ---
+        // Memuat data ke WebView dengan tema yang sudah disesuaikan
+        setupWebView(storyHtml);
 
         textToSpeech = new TextToSpeech(this, this);
 
-        // --- PERUBAHAN: Logika Setup Audio ---
-        // Cek jenis audio untuk setup (logika setText dihapus)
         if (story.getAudio().equals("GT")) {
-            // Jika "GT", tombol akan menggunakan TextToSpeech.
+            // Siap untuk TTS
         } else {
-            // Jika file audio, setup MediaPlayer.
             setupMediaPlayer(story.getAudio());
         }
-        // --- Akhir Perubahan ---
 
-
-        // --- PERUBAHAN: Listener Tombol Tunggal ---
-        btnPlay.setOnClickListener(new View.OnClickListener() {
+        btnListen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Cek tipe audio di dalam listener
                 if (story.getAudio().equals("GT")) {
                     playTextToSpeech();
                 } else {
@@ -122,14 +104,62 @@ public class DetailStoryActivity extends AppCompatActivity implements TextToSpee
                 }
             }
         });
-        // --- Akhir Perubahan ---
+
+        btnRead.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleReadView();
+            }
+        });
     }
 
-    // --- Logika Text-to-Speech (GT) ---
+    private void setupWebView(String storyHtml) {
+        webViewDetail.getSettings().setJavaScriptEnabled(true);
+        // Set latar belakang WebView menjadi transparan agar latar belakang layout terlihat
+        webViewDetail.setBackgroundColor(Color.TRANSPARENT);
+
+        String themedHtml;
+        if (storyHtml == null || storyHtml.isEmpty()) {
+            // Tampilkan pesan error dengan gaya tema gelap
+            themedHtml = "<html><body style='color: #FFFFFF; background-color: transparent;'>Cerita tidak ditemukan.</body></html>";
+        } else {
+            // --- INI ADALAH PERUBAHAN PENTING ---
+            // 1. Ganti CSS bawaan (teks hitam, latar putih) dengan CSS tema baru (teks putih, latar transparan)
+            themedHtml = storyHtml.replace(
+                    "color: #000000; background-color: #FFFFFF;",
+                    "color: #FFFFFF; background-color: transparent;"
+            );
+
+            // 2. Tambahkan gaya untuk tag <em> (italic) agar warnanya kuning (accentYellow)
+            // Kita menyisipkannya tepat sebelum tag </style> penutup
+            themedHtml = themedHtml.replace(
+                    "</style>",
+                    " em { color: #FFD400; font-style: italic; } </style>"
+            );
+        }
+
+        // Muat HTML yang sudah dimodifikasi
+        webViewDetail.loadDataWithBaseURL(null, themedHtml, "text/html; charset=utf-8", "UTF-8", null);
+    }
+
+    private void toggleReadView() {
+        if (webViewDetail.getVisibility() == View.GONE) {
+            webViewDetail.setVisibility(View.VISIBLE);
+            tvDescription.setVisibility(View.GONE);
+            btnRead.setText("Hide Text");
+            btnRead.setIconResource(R.drawable.ic_review); // (Contoh: ikon mata tertutup/hide)
+        } else {
+            webViewDetail.setVisibility(View.GONE);
+            tvDescription.setVisibility(View.VISIBLE);
+            btnRead.setText("Read");
+            btnRead.setIconResource(R.drawable.ic_read);
+        }
+    }
+
     @Override
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) {
-            int result = textToSpeech.setLanguage(new Locale("id", "ID")); // Bahasa Indonesia
+            int result = textToSpeech.setLanguage(new Locale("id", "ID"));
             if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                 Toast.makeText(this, "Bahasa tidak didukung!", Toast.LENGTH_SHORT).show();
             } else {
@@ -145,17 +175,27 @@ public class DetailStoryActivity extends AppCompatActivity implements TextToSpee
             Toast.makeText(this, "Text-to-Speech belum siap.", Toast.LENGTH_SHORT).show();
             return;
         }
-        textToSpeech.setPitch(1.0f);
-        textToSpeech.setSpeechRate(1.0f);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            textToSpeech.speak(storyText, TextToSpeech.QUEUE_FLUSH, null, null);
+        if (textToSpeech.isSpeaking()) {
+            textToSpeech.stop();
+            btnListen.setText("Listen");
+            btnListen.setIconResource(R.drawable.ic_listen);
+            isPlaying = false;
         } else {
-            textToSpeech.speak(storyText, TextToSpeech.QUEUE_FLUSH, null);
+            textToSpeech.setPitch(1.0f);
+            textToSpeech.setSpeechRate(1.0f);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                textToSpeech.speak(storyText, TextToSpeech.QUEUE_FLUSH, null, null);
+            } else {
+                textToSpeech.speak(storyText, TextToSpeech.QUEUE_FLUSH, null);
+            }
+            btnListen.setText("Pause");
+            btnListen.setIconResource(R.drawable.ic_pause);
+            isPlaying = true;
         }
     }
 
-    // --- Logika MediaPlayer (File Audio) ---
     private void setupMediaPlayer(String fileName) {
         mediaPlayer = new MediaPlayer();
         try {
@@ -169,6 +209,9 @@ public class DetailStoryActivity extends AppCompatActivity implements TextToSpee
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     mediaPlayer.seekTo(0);
+                    btnListen.setText("Listen");
+                    btnListen.setIconResource(R.drawable.ic_listen);
+                    isPlaying = false;
                 }
             });
 
@@ -182,8 +225,14 @@ public class DetailStoryActivity extends AppCompatActivity implements TextToSpee
         if (isAudioFileReady) {
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.pause();
+                btnListen.setText("Listen");
+                btnListen.setIconResource(R.drawable.ic_listen);
+                isPlaying = false;
             } else {
                 mediaPlayer.start();
+                btnListen.setText("Pause");
+                btnListen.setIconResource(R.drawable.ic_pause);
+                isPlaying = true;
             }
         }
     }
@@ -195,7 +244,9 @@ public class DetailStoryActivity extends AppCompatActivity implements TextToSpee
             textToSpeech.shutdown();
         }
         if (mediaPlayer != null) {
-            mediaPlayer.stop();
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
             mediaPlayer.release();
             mediaPlayer = null;
         }

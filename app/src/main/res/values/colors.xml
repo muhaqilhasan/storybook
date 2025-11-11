@@ -2,4 +2,13 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Palet Tema Gelap "Znichka" -->
+    <color name="primaryDark">#2C0D4B</color> <!-- Latar belakang ungu tua -->
+    <color name="primaryLight">#6A2D9D</color> <!-- Aksen ungu lebih terang -->
+    <color name="accentOrange">#FF9E00</color> <!-- Tombol utama "Listen" -->
+    <color name="accentYellow">#FFD400</color> <!-- Aksen bintang/filter -->
+    <color name="accentPink">#FF6F91</color>
+    <color name="textPrimary">#FFFFFF</color> <!-- Teks putih -->
+    <color name="textSecondary">#B3FFFFFF</color> <!-- Teks abu-abu/deskripsi (Putih 70%) -->
 </resources>

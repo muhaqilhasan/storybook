@@ -5,13 +5,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import com.google.android.material.button.MaterialButton; // DIUBAH
 import androidx.appcompat.app.AppCompatActivity;
 import id.akarudev.storybook.BuildConfig;
 import id.akarudev.storybook.R;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btnStart, btnShare, btnReview;
+    MaterialButton btnStart, btnShare, btnReview, btnExit; // Tipe diubah & btnExit ditambah
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         btnStart = findViewById(R.id.btnStart);
         btnShare = findViewById(R.id.btnShare);
         btnReview = findViewById(R.id.btnReview);
+        btnExit = findViewById(R.id.btnExit); // BARU
 
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,5 +50,15 @@ public class MainActivity extends AppCompatActivity {
                         Uri.parse("http://play.google.com/store/apps/details?id=" + BuildConfig.APPLICATION_ID)));
             }
         });
+
+        // --- LOGIKA TOMBOL EXIT BARU ---
+        btnExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Menutup semua activity dan keluar dari aplikasi
+                finishAffinity();
+            }
+        });
+        // --- AKHIR LOGIKA TOMBOL EXIT ---
     }
 }

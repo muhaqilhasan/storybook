@@ -1,7 +1,10 @@
 package id.akarudev.storybook.ui;
 import android.os.Bundle;
+import android.view.Menu; // DITAMBAHKAN
+import android.view.MenuItem; // DITAMBAHKAN
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView; // DITAMBAHKAN
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
@@ -20,11 +23,10 @@ import id.akarudev.storybook.model.StoryResponse;
 
 public class StoryListActivity extends AppCompatActivity {
 
-
     Toolbar toolbar;
     RecyclerView recyclerView;
     StoryAdapter storyAdapter;
-    List<DataStory> storyList = new ArrayList<>(); // Diubah ke DataStory
+    List<DataStory> storyList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,14 +43,13 @@ public class StoryListActivity extends AppCompatActivity {
                 finish();
             }
         });
-        setTitle("List of Childrens Stories");
+        setTitle("Pilih Cerita"); // Judul diubah
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         loadJsonData();
 
-        // Menggunakan StoryAdapter dari paket .adapter
         storyAdapter = new StoryAdapter(this, storyList);
         recyclerView.setAdapter(storyAdapter);
     }
@@ -56,7 +57,6 @@ public class StoryListActivity extends AppCompatActivity {
     private void loadJsonData() {
         String json = null;
         try {
-            // Membaca Story.json
             InputStream is = getAssets().open("Story.json");
             int size = is.available();
             byte[] buffer = new byte[size];
@@ -76,4 +76,41 @@ public class StoryListActivity extends AppCompatActivity {
             }
         }
     }
+
+    // --- LOGIKA SEARCH BARU ---
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.search_menu, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // Panggil filter di adapter
+                storyAdapter.filter(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // Panggil filter di adapter secara real-time
+                storyAdapter.filter(newText);
+                return true;
+            }
+        });
+
+        // Saat ikon search ditutup, tampilkan kembali list penuh
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                storyAdapter.filter("");
+                return false;
+            }
+        });
+
+        return super.onCreateOptionsMenu(menu);
+    }
+    // --- AKHIR LOGIKA SEARCH ---
 }

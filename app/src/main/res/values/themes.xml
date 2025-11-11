@@ -1,9 +1,42 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
     <style name="Base.Theme.Storybook" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Warna utama -->
+        <item name="colorPrimary">@color/primaryLight</item>
+        <item name="colorPrimaryVariant">@color/primaryDark</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Warna sekunder (bisa sama atau berbeda) -->
+        <item name="colorSecondary">@color/accentOrange</item>
+        <item name="colorSecondaryVariant">@color/accentYellow</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <!-- Warna latar belakang -->
+        <item name="android:colorBackground">@color/primaryDark</item>
+        <item name="colorSurface">@color/primaryDark</item>
+        <item name="colorOnBackground">@color/textPrimary</item>
+        <item name="colorOnSurface">@color/textPrimary</item>
+
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@color/primaryDark</item>
     </style>
 
     <style name="Theme.Storybook" parent="Base.Theme.Storybook" />
+
+    <!-- Gaya Tombol Primer (Oranye) -->
+    <style name="Widget.Storybook.Button.Primary" parent="Widget.Material3.Button">
+        <item name="android:backgroundTint">@color/accentOrange</item>
+        <item name="android:textColor">@color/primaryDark</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cornerRadius">16dp</item>
+    </style>
+
+    <!-- Gaya Tombol Sekunder (Garis Tepi) -->
+    <style name="Widget.Storybook.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/accentYellow</item>
+        <item name="strokeColor">@color/accentYellow</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cornerRadius">16dp</item>
+    </style>
+
+
 </resources>
